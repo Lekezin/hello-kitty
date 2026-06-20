@@ -1,0 +1,12 @@
+const characters = [
+  { id: "kitty", name: "Hello Kitty", icon: "🎀", color: "#ffd1dc", favorite: "cake", line: "Vamos fazer o jardim brilhar!", bonus: "Toques +15%", tapBoost: .15, hpsBoost: 0, friendBoost: 0, costReduction: 0, xpBoost: 0, storyBoost: 0 },
+  { id: "melody", name: "My Melody", icon: "🌸", color: "#ffc4df", favorite: "flower", line: "Flores deixam tudo mais gentil.", bonus: "Amizade +30%", tapBoost: 0, hpsBoost: .06, friendBoost: .30, costReduction: 0, xpBoost: 0, storyBoost: 0 },
+  { id: "kuromi", name: "Kuromi", icon: "💜", color: "#c4b8ff", favorite: "plush", line: "Doce, mas com atitude.", bonus: "Clique +20%", tapBoost: .20, hpsBoost: .1, friendBoost: 0, costReduction: 0, xpBoost: 0, storyBoost: 0 },
+  { id: "cinnamoroll", name: "Cinnamoroll", icon: "☁️", color: "#c9efff", favorite: "icecream", line: "Um vento fofinho trouxe corações.", bonus: "Produção +25%", tapBoost: 0, hpsBoost: .25, friendBoost: 0, costReduction: 0, xpBoost: 0, storyBoost: 0 },
+  { id: "pompom", name: "Pompompurin", icon: "🍮", color: "#ffe8a6", favorite: "pudding", line: "Pausa para pudim e progresso.", bonus: "Custos -15%", tapBoost: .04, hpsBoost: .12, friendBoost: 0, costReduction: .15, xpBoost: 0, storyBoost: 0 },
+  { id: "keroppi", name: "Keroppi", icon: "🐸", color: "#b9f3d5", favorite: "book", line: "A aventura pula de fase em fase.", bonus: "XP +20%", tapBoost: 0, hpsBoost: .04, friendBoost: 0, costReduction: 0, xpBoost: .20, storyBoost: 0 },
+  { id: "badtz", name: "Badtz-Maru", icon: "⚡", color: "#bfc6d8", favorite: "chocolate", line: "Corações com estilo, combinado?", bonus: "Críticos +12%", tapBoost: .12, hpsBoost: 0, friendBoost: 0, costReduction: 0, xpBoost: 0, storyBoost: 0 },
+  { id: "chococat", name: "Chococat", icon: "📚", color: "#d6c0ff", favorite: "book", line: "Tenho uma pista brilhante.", bonus: "Missões +20%", tapBoost: 0, hpsBoost: .05, friendBoost: 0, costReduction: 0, xpBoost: 0, storyBoost: .20 },
+  { id: "twinstars", name: "Little Twin Stars", icon: "🌟", color: "#d9dcff", favorite: "ribbon", line: "As estrelas contam histórias.", bonus: "Histórias +30%", tapBoost: .03, hpsBoost: .07, friendBoost: 0, costReduction: 0, xpBoost: 0, storyBoost: .30 },
+  { id: "daniel", name: "Dear Daniel", icon: "💌", color: "#ffd9bb", favorite: "ribbon", line: "Uma carta nova chegou.", bonus: "Amizade +20%", tapBoost: .02, hpsBoost: .04, friendBoost: .20, costReduction: 0, xpBoost: 0, storyBoost: 0 }
+];

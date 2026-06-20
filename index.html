@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffd9e8">
+  <title>Hello Kitty Dream Hearts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app" id="app" data-active-tab="garden" data-time="day">
+    <div class="world" id="worldContainer" aria-hidden="true">
+      <div class="sun"></div>
+      <div class="moon"></div>
+      <div class="stars-container"></div>
+      <div class="cloud one"></div>
+      <div class="cloud two"></div>
+      <div class="hills" id="hills"></div>
+      <div class="cottage-row" id="cottageRow">
+        <div class="mini-house left" data-unlock-lv="5"></div>
+        <div class="cottage"></div>
+        <div class="mini-house right" data-unlock-lv="8"></div>
+      </div>
+      <div class="path" id="mainPath"></div>
+      <div class="garden-bloom left" data-unlock-lv="2"></div>
+      <div class="garden-bloom right" data-unlock-lv="4"></div>
+
+      <div id="npcLayer" class="npc-layer"></div>
+      <div id="eventLayer" class="event-layer"></div>
+    </div>
+
+    <header class="hud" aria-label="Estado do jogo">
+      <div class="level-pill pill">
+        <div class="level-star" aria-hidden="true">☆</div>
+        <div class="level-meta">
+          <span class="level-label" id="levelLabel">Lv. 15</span>
+          <div class="xp-bar" aria-hidden="true"><span class="xp-fill" id="xpFill"></span></div>
+        </div>
+      </div>
+
+      <div class="heart-counter counter" aria-live="polite">
+        <span class="heart" aria-hidden="true">♡</span>
+        <span id="heartCounter">5.432</span>
+      </div>
+
+      <div class="side-counters">
+        <div class="small-counter counter" title="Produção automática"><span>✦</span><span id="hpsCounter">0/s</span>
+        </div>
+        <div class="small-counter counter" title="Cristais"><span>💎</span><span id="gemCounter">36</span></div>
+        <button class="icon-button" id="settingsButton" type="button" aria-label="Configurações">⚙</button>
+      </div>
+    </header>
+
+    <main class="playfield" aria-label="Jardim mágico">
+      <!-- Reworked scenario layers -->
+      <div class="layer-sky" id="layerSky" aria-hidden="true"></div>
+      <div class="layer-bg" id="layerBg" aria-hidden="true"></div>
+      <div class="layer-buildings" id="layerBuildings" aria-hidden="true"></div>
+
+      <div class="layer-characters" id="layerCharacters">
+        <div class="character-stage">
+          <div class="aura" aria-hidden="true"></div>
+          <button class="character-button" id="characterButton" type="button" aria-label="Toque para ganhar corações">
+            <svg class="kitty-svg animated-kitty" viewBox="0 0 360 430" role="img" aria-labelledby="kittyTitle">
+              <title id="kittyTitle">Mascote principal kawaii</title>
+              <defs>
+                <radialGradient id="faceGlow" cx="45%" cy="28%" r="75%">
+                  <stop offset="0%" stop-color="#fffdf2" />
+                  <stop offset="58%" stop-color="#fff7e8" />
+                  <stop offset="100%" stop-color="#f5d8dc" />
+                </radialGradient>
+                <linearGradient id="dressGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#ff88ac" />
+                  <stop offset="100%" stop-color="#ff6f9a" />
+                </linearGradient>
+                <linearGradient id="bowGrad" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#ff7da3" />
+                  <stop offset="100%" stop-color="#ffc0d2" />
+                </linearGradient>
+              </defs>
+              <ellipse cx="180" cy="374" rx="104" ry="24" fill="rgba(123,90,104,.13)" />
+              <path
+                d="M94 153 C62 108 55 62 75 42 C99 17 143 61 160 84 C176 78 193 78 209 84 C226 58 270 17 294 42 C315 63 296 111 266 153 Z"
+                fill="url(#faceGlow)" stroke="rgba(255,255,255,.82)" stroke-width="8" />
+              <path
+                d="M64 162 C64 80 118 55 180 55 C243 55 296 80 296 162 C296 236 249 274 180 274 C111 274 64 236 64 162Z"
+                fill="url(#faceGlow)" stroke="rgba(255,255,255,.88)" stroke-width="8" />
+              <ellipse class="kitty-eye left" cx="129" cy="167" rx="12" ry="17" fill="#513042" />
+              <ellipse class="kitty-eye right" cx="231" cy="167" rx="12" ry="17" fill="#513042" />
+              <ellipse cx="180" cy="184" rx="17" ry="11" fill="#ffcf22" stroke="#eead00" stroke-width="3" />
+              <ellipse class="kitty-blush" cx="111" cy="197" rx="23" ry="11" fill="#ffadc6" />
+              <ellipse class="kitty-blush" cx="249" cy="197" rx="23" ry="11" fill="#ffadc6" />
+              <path d="M89 169 C52 158 31 159 12 170" stroke="#573346" stroke-width="6" stroke-linecap="round" />
+              <path d="M93 192 C55 196 33 207 18 223" stroke="#573346" stroke-width="6" stroke-linecap="round" />
+              <path d="M267 169 C304 158 326 159 348 170" stroke="#573346" stroke-width="6" stroke-linecap="round" />
+              <path d="M267 192 C305 196 328 207 342 223" stroke="#573346" stroke-width="6" stroke-linecap="round" />
+              <g transform="translate(219 57) rotate(12)">
+                <path d="M24 39 C-13 31 -8 -12 28 8 C35 13 38 23 36 31 C35 36 31 39 24 39Z" fill="url(#bowGrad)"
+                  stroke="#d94b75" stroke-width="5" />
+                <path d="M65 39 C102 31 97 -12 61 8 C54 13 51 23 53 31 C54 36 58 39 65 39Z" fill="url(#bowGrad)"
+                  stroke="#d94b75" stroke-width="5" />
+                <circle cx="45" cy="31" r="20" fill="#ff9fbb" stroke="#d94b75" stroke-width="5" />
+                <circle cx="39" cy="24" r="7" fill="rgba(255,255,255,.65)" />
+              </g>
+              <path id="kittyDress"
+                d="M118 268 C118 241 143 228 180 228 C217 228 242 241 242 268 L254 346 C260 382 228 394 206 372 C195 386 165 386 154 372 C131 394 100 382 106 346Z"
+                fill="url(#dressGrad)" stroke="rgba(255,255,255,.76)" stroke-width="7" />
+              <path d="M110 277 C73 288 67 332 94 343 C115 352 131 328 132 297Z" fill="url(#faceGlow)"
+                stroke="rgba(255,255,255,.82)" stroke-width="7" />
+              <path d="M250 277 C287 288 293 332 266 343 C245 352 229 328 228 297Z" fill="url(#faceGlow)"
+                stroke="rgba(255,255,255,.82)" stroke-width="7" />
+              <circle cx="151" cy="285" r="10" fill="#fff8ef" stroke="#d96a87" stroke-width="3" />
+              <circle cx="209" cy="285" r="10" fill="#fff8ef" stroke="#d96a87" stroke-width="3" />
+              <path d="M136 365 C139 338 158 330 177 346 C173 374 156 386 136 365Z" fill="url(#faceGlow)"
+                stroke="rgba(255,255,255,.82)" stroke-width="7" />
+              <path d="M224 365 C221 338 202 330 183 346 C187 374 204 386 224 365Z" fill="url(#faceGlow)"
+                stroke="rgba(255,255,255,.82)" stroke-width="7" />
+            </svg>
+            <svg class="kuromi-svg animated-kuromi" viewBox="0 0 360 430" role="img" aria-labelledby="kuromiTitle">
+              <title id="kuromiTitle">Kuromi mascote principal kawaii</title>
+              <defs>
+                <radialGradient id="kuromiFaceGlow" cx="45%" cy="30%" r="72%">
+                  <stop offset="0%" stop-color="#fff9f5" />
+                  <stop offset="60%" stop-color="#fff0f4" />
+                  <stop offset="100%" stop-color="#e8d2ec" />
+                </radialGradient>
+                <linearGradient id="kuromiHoodGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#3b294b" />
+                  <stop offset="62%" stop-color="#22172f" />
+                  <stop offset="100%" stop-color="#14101e" />
+                </linearGradient>
+                <linearGradient id="kuromiPinkGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#ff8fbf" />
+                  <stop offset="100%" stop-color="#e65091" />
+                </linearGradient>
+                <linearGradient id="kuromiDressGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#7c5aa6" />
+                  <stop offset="100%" stop-color="#2a1839" />
+                </linearGradient>
+              </defs>
+              <ellipse cx="180" cy="374" rx="104" ry="24" fill="rgba(54,35,73,.18)" />
+
+              <!-- Rabinho Diabinho -->
+              <path d="M 230 320 Q 280 340 290 290" stroke="url(#kuromiHoodGrad)" stroke-width="8" fill="none"
+                stroke-linecap="round" />
+              <polygon points="280,298 290,280 300,298" fill="url(#kuromiHoodGrad)" stroke="url(#kuromiHoodGrad)"
+                stroke-width="2" stroke-linejoin="round" />
+
+              <!-- Orelhas do Capuz (Afiadas e Curvas) -->
+              <path class="kuromi-ear left" d="M120 120 C 80 80 30 30 35 15 C 55 5 110 50 150 95 Z"
+                fill="url(#kuromiHoodGrad)" stroke="rgba(255,255,255,.75)" stroke-width="7" stroke-linejoin="round" />
+              <path class="kuromi-ear right" d="M240 120 C 280 80 330 30 325 15 C 305 5 250 50 210 95 Z"
+                fill="url(#kuromiHoodGrad)" stroke="rgba(255,255,255,.75)" stroke-width="7" stroke-linejoin="round" />
+              <circle cx="35" cy="15" r="17" fill="url(#kuromiPinkGrad)" stroke="rgba(255,255,255,.68)"
+                stroke-width="5" />
+              <circle cx="325" cy="15" r="17" fill="url(#kuromiPinkGrad)" stroke="rgba(255,255,255,.68)"
+                stroke-width="5" />
+
+              <!-- Base do Capuz -->
+              <path
+                d="M58 158 C58 76 116 45 180 45 C244 45 302 76 302 158 C302 236 250 279 180 279 C110 279 58 236 58 158Z"
+                fill="url(#kuromiHoodGrad)" stroke="rgba(255,255,255,.86)" stroke-width="8" />
+
+              <!-- Rosto Base -->
+              <path
+                d="M88 174 C88 112 125 86 180 86 C235 86 272 112 272 174 C272 228 235 258 180 258 C125 258 88 228 88 174Z"
+                fill="url(#kuromiFaceGlow)" stroke="rgba(255,255,255,.72)" stroke-width="6" />
+
+              <!-- Caveirinha do Capuz -->
+              <g class="kuromi-skull" transform="translate(145 61)">
+                <path
+                  d="M35 13 C58 13 72 27 72 49 C72 65 61 74 48 77 L48 88 L39 88 L39 78 L31 78 L31 88 L22 88 L22 77 C9 74 0 64 0 49 C0 27 13 13 35 13Z"
+                  fill="#fff7fb" stroke="#ff8fbf" stroke-width="5" />
+                <circle cx="24" cy="49" r="6" fill="#2c1b38" />
+                <circle cx="48" cy="49" r="6" fill="#2c1b38" />
+                <path d="M32 63 L38 63" stroke="#2c1b38" stroke-width="4" stroke-linecap="round" />
+              </g>
+
+              <!-- Olhos Inclinados com Cílios -->
+              <g transform="translate(135, 180) rotate(12)">
+                <ellipse cx="0" cy="0" rx="10" ry="16" fill="#3a2447" />
+                <path d="M -7 -12 L -14 -18 M -2 -15 L -6 -23 M 6 -13 L 4 -21" stroke="#3a2447" stroke-width="3"
+                  stroke-linecap="round" />
+              </g>
+              <g transform="translate(225, 180) rotate(-12)">
+                <ellipse cx="0" cy="0" rx="10" ry="16" fill="#3a2447" />
+                <path d="M 7 -12 L 14 -18 M 2 -15 L 6 -23 M -6 -13 L -4 -21" stroke="#3a2447" stroke-width="3"
+                  stroke-linecap="round" />
+              </g>
+
+              <!-- Nariz Rosa e Sorriso Smirk Malicioso -->
+              <ellipse cx="180" cy="198" rx="7" ry="4" fill="#ff8fbf" />
+              <path d="M 160 215 Q 175 220 195 205" stroke="#6b4058" stroke-width="5" stroke-linecap="round"
+                fill="none" />
+
+              <!-- Blush nas Bochechas -->
+              <ellipse class="kuromi-blush" cx="115" cy="205" rx="18" ry="8" fill="#ffb3d1" opacity="0.8" />
+              <ellipse class="kuromi-blush" cx="245" cy="205" rx="18" ry="8" fill="#ffb3d1" opacity="0.8" />
+
+              <!-- Base do Vestido -->
+              <path
+                d="M111 268 C111 239 139 224 180 224 C221 224 249 239 249 268 L263 347 C269 383 229 394 207 371 C195 386 165 386 153 371 C131 394 91 383 97 347Z"
+                fill="url(#kuromiDressGrad)" stroke="rgba(255,255,255,.75)" stroke-width="7" />
+
+              <!-- Gola Jester (Bobo da Corte) com as bolinhas -->
+              <path
+                d="M 105 245 L 125 275 L 145 250 L 160 285 L 180 255 L 200 285 L 215 250 L 235 275 L 255 245 C 230 225 130 225 105 245 Z"
+                fill="url(#kuromiPinkGrad)" stroke="rgba(255,255,255,.85)" stroke-width="4" stroke-linejoin="round" />
+              <circle cx="125" cy="275" r="6" fill="#fff" stroke="#e65091" stroke-width="2" />
+              <circle cx="160" cy="285" r="6" fill="#fff" stroke="#e65091" stroke-width="2" />
+              <circle cx="200" cy="285" r="6" fill="#fff" stroke="#e65091" stroke-width="2" />
+              <circle cx="235" cy="275" r="6" fill="#fff" stroke="#e65091" stroke-width="2" />
+
+              <!-- Braços / Mangas -->
+              <path d="M128 278 C90 290 78 329 101 344 C123 359 142 331 145 298Z" fill="url(#kuromiFaceGlow)"
+                stroke="rgba(255,255,255,.8)" stroke-width="7" />
+              <path d="M232 278 C270 290 282 329 259 344 C237 359 218 331 215 298Z" fill="url(#kuromiFaceGlow)"
+                stroke="rgba(255,255,255,.8)" stroke-width="7" />
+              <circle cx="158" cy="288" r="10" fill="#fff8ef" stroke="#6d477a" stroke-width="3" />
+              <circle cx="202" cy="288" r="10" fill="#fff8ef" stroke="#6d477a" stroke-width="3" />
+
+              <!-- Pés -->
+              <path d="M137 364 C141 337 160 330 178 346 C174 374 156 385 137 364Z" fill="url(#kuromiFaceGlow)"
+                stroke="rgba(255,255,255,.82)" stroke-width="7" />
+              <path d="M223 364 C219 337 200 330 182 346 C186 374 204 385 223 364Z" fill="url(#kuromiFaceGlow)"
+                stroke="rgba(255,255,255,.82)" stroke-width="7" />
+            </svg>
+            <svg class="chococat-svg animated-chococat" viewBox="0 0 360 430" role="img" aria-labelledby="chococatTitle">
+              <title id="chococatTitle">Chococat mascote principal</title>
+              <defs>
+                <radialGradient id="chococatFaceGlow" cx="45%" cy="28%" r="75%">
+                  <stop offset="0%" stop-color="#4a4a4a" />
+                  <stop offset="58%" stop-color="#2d2d2d" />
+                  <stop offset="100%" stop-color="#141414" />
+                </radialGradient>
+                <linearGradient id="collarGrad" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#4a90e2" />
+                  <stop offset="100%" stop-color="#2a68b0" />
+                </linearGradient>
+              </defs>
+              <ellipse cx="180" cy="374" rx="104" ry="24" fill="rgba(10,10,10,.25)" />
+              
+              <!-- Orelhas (mais pontudas e pretas) -->
+              <path class="chococat-ear left" d="M90 130 C 60 90 40 40 45 25 C 65 15 110 50 140 90 Z" fill="url(#chococatFaceGlow)" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round" />
+              <path class="chococat-ear right" d="M270 130 C 300 90 320 40 315 25 C 295 15 250 50 220 90 Z" fill="url(#chococatFaceGlow)" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round" />
+              <!-- Interior das orelhas levemente mais claro -->
+              <path d="M85 115 C 65 85 55 50 50 40 C 65 35 95 65 125 100 Z" fill="#3a3a3a" />
+              <path d="M275 115 C 295 85 305 50 310 40 C 295 35 265 65 235 100 Z" fill="#3a3a3a" />
+
+              <!-- Rosto Redondo Chococat -->
+              <path d="M64 172 C64 90 118 65 180 65 C243 65 296 90 296 172 C296 246 249 284 180 284 C111 284 64 246 64 172Z" fill="url(#chococatFaceGlow)" stroke="#1a1a1a" stroke-width="8" />
+
+              <!-- Bigodes Grandes (Antenas de Fofoca) -->
+              <path d="M 80 160 Q 40 150 10 140" stroke="#000" stroke-width="7" fill="none" stroke-linecap="round" />
+              <path d="M 80 185 Q 35 185 5 185" stroke="#000" stroke-width="7" fill="none" stroke-linecap="round" />
+              <path d="M 80 210 Q 40 220 10 230" stroke="#000" stroke-width="7" fill="none" stroke-linecap="round" />
+
+              <path d="M 280 160 Q 320 150 350 140" stroke="#000" stroke-width="7" fill="none" stroke-linecap="round" />
+              <path d="M 280 185 Q 325 185 355 185" stroke="#000" stroke-width="7" fill="none" stroke-linecap="round" />
+              <path d="M 280 210 Q 320 220 350 230" stroke="#000" stroke-width="7" fill="none" stroke-linecap="round" />
+
+              <!-- Olhos Grandes (redondos) -->
+              <circle class="chococat-eye left" cx="129" cy="167" r="14" fill="#fffff0" stroke="#333" stroke-width="2" />
+              <circle cx="129" cy="167" r="8" fill="#111" />
+              <circle cx="125" cy="163" r="3" fill="#fff" />
+              
+              <circle class="chococat-eye right" cx="231" cy="167" r="14" fill="#fffff0" stroke="#333" stroke-width="2" />
+              <circle cx="231" cy="167" r="8" fill="#111" />
+              <circle cx="227" cy="163" r="3" fill="#fff" />
+
+              <!-- Nariz Cor de Chocolate -->
+              <ellipse cx="180" cy="190" rx="14" ry="10" fill="#6b3e2a" stroke="#4a2512" stroke-width="2" />
+
+              <!-- Blush -->
+              <ellipse class="chococat-blush" cx="111" cy="205" rx="18" ry="8" fill="#ffb3d1" opacity="0.6" />
+              <ellipse class="chococat-blush" cx="249" cy="205" rx="18" ry="8" fill="#ffb3d1" opacity="0.6" />
+
+              <!-- Corpo Base -->
+              <path d="M118 268 C118 241 143 235 180 235 C217 235 242 241 242 268 L254 346 C260 382 228 394 206 372 C195 386 165 386 154 372 C131 394 100 382 106 346Z" fill="url(#chococatFaceGlow)" stroke="#1a1a1a" stroke-width="7" />
+
+              <!-- Coleira Azul -->
+              <path d="M 125 255 Q 180 280 235 255" fill="none" stroke="url(#collarGrad)" stroke-width="12" stroke-linecap="round" />
+              
+              <!-- Braços -->
+              <path d="M110 277 C73 288 67 332 94 343 C115 352 131 328 132 297Z" fill="url(#chococatFaceGlow)" stroke="#1a1a1a" stroke-width="7" />
+              <path d="M250 277 C287 288 293 332 266 343 C245 352 229 328 228 297Z" fill="url(#chococatFaceGlow)" stroke="#1a1a1a" stroke-width="7" />
+
+              <!-- Pés -->
+              <path d="M136 365 C139 338 158 330 177 346 C173 374 156 386 136 365Z" fill="url(#chococatFaceGlow)" stroke="#1a1a1a" stroke-width="7" />
+              <path d="M224 365 C221 338 202 330 183 346 C187 374 204 386 224 365Z" fill="url(#chococatFaceGlow)" stroke="#1a1a1a" stroke-width="7" />
+            </svg>
+            <span class="mood-bubble" id="moodBubble">Vamos fazer o jardim brilhar!</span>
+          </button>
+        </div> <!-- End character-stage -->
+      </div> <!-- End layer-characters -->
+
+      <div class="layer-foreground" id="layerForeground" aria-hidden="true"></div>
+
+      <div class="particle-layer" id="particleLayer" aria-hidden="true"></div>
+      <div class="toast-layer" id="toastLayer" aria-live="polite"></div>
+    </main>
+
+    <section class="sheet" id="sheet" aria-live="polite">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <div class="sheet-title">
+          <span id="panelIcon">🌷</span>
+          <div>
+            <span id="panelTitle">Jardim dos Sonhos</span>
+            <small id="panelSubtitle">toque, construa e colecione</small>
+          </div>
+        </div>
+        <button class="bubble-button tiny-button" id="quickGiftButton" type="button">🎁 Presente</button>
+      </div>
+      <div class="sheet-content" id="panelContent"></div>
+    </section>
+
+    <nav class="nav" aria-label="Navegação principal">
+      <button class="nav-button is-active" type="button" data-tab="garden"><span
+          class="nav-icon">♡</span><span>Jardim</span></button>
+      <button class="nav-button" type="button" data-tab="build"><span
+          class="nav-icon">🏰</span><span>Obras</span></button>
+      <button class="nav-button" type="button" data-tab="friends"><span
+          class="nav-icon">👥</span><span>Amigos</span></button>
+      <button class="nav-button" type="button" data-tab="stories"><span
+          class="nav-icon">📖</span><span>Histórias</span></button>
+      <button class="nav-button" type="button" data-tab="diary"><span
+          class="nav-icon">✦</span><span>Diário</span></button>
+    </nav>
+
+  </div>
+
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-title">
+        <h2 id="modalTitle">Dream Hearts</h2>
+        <button class="icon-button" type="button" id="closeModal" aria-label="Fechar">×</button>
+      </div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="characters.js"></script>
+  <script src="buildings.js"></script>
+  <script src="stories.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
