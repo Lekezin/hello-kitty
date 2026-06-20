@@ -918,8 +918,6 @@ function handleTap(event) {
       const el = npcsElements[Math.floor(Math.random() * npcsElements.length)];
       el.classList.add("npc-react");
       setTimeout(() => el.classList.remove("npc-react"), 400);
-      const rectNpc = el.getBoundingClientRect();
-      burstAt(rectNpc.left + rectNpc.width / 2, rectNpc.top, 3, "💖");
     }
   }
 
@@ -1261,12 +1259,18 @@ function spawnAmbientPetals(glyph, count, opts = {}) {
   }
 }
 
+const _hudHeartEl = document.getElementById("heartCounter");
+const _hudLevelEl = document.getElementById("levelLabel");
+const _hudXpEl = document.getElementById("xpFill");
+const _hudHpsEl = document.getElementById("hpsCounter");
+const _hudGemEl = document.getElementById("gemCounter");
+
 function renderHud() {
-  document.getElementById("heartCounter").textContent = formatNumber(Math.floor(state.hearts));
-  document.getElementById("levelLabel").textContent = `Lv. ${state.level}`;
-  document.getElementById("xpFill").style.width = `${Math.min(100, (state.xp / xpForLevel(state.level)) * 100)}%`;
-  document.getElementById("hpsCounter").textContent = `${formatNumber(productionPerSecond())}/s`;
-  document.getElementById("gemCounter").textContent = formatNumber(state.gems);
+  _hudHeartEl.textContent = formatNumber(Math.floor(state.hearts));
+  _hudLevelEl.textContent = `Lv. ${state.level}`;
+  _hudXpEl.style.width = `${Math.min(100, (state.xp / xpForLevel(state.level)) * 100)}%`;
+  _hudHpsEl.textContent = `${formatNumber(productionPerSecond())}/s`;
+  _hudGemEl.textContent = formatNumber(state.gems);
   
   // Real-time UI updates for Build panel buttons
   if (state.activeTab === "build") {
@@ -2177,20 +2181,22 @@ document.addEventListener("pointerup", releasePress);
 document.addEventListener("pointercancel", releasePress);
 
 let pointerTicking = false;
-document.addEventListener("pointermove", (event) => {
-  if (!pointerTicking) {
-    requestAnimationFrame(() => {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      const px = Math.max(-1, Math.min(1, (event.clientX - cx) / cx));
-      const py = Math.max(-1, Math.min(1, (event.clientY - cy) / cy));
-      document.body.style.setProperty("--px", px.toFixed(3));
-      document.body.style.setProperty("--py", py.toFixed(3));
-      pointerTicking = false;
-    });
-    pointerTicking = true;
-  }
-});
+if (!isMobileRuntime) {
+  document.addEventListener("pointermove", (event) => {
+    if (!pointerTicking) {
+      requestAnimationFrame(() => {
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        const px = Math.max(-1, Math.min(1, (event.clientX - cx) / cx));
+        const py = Math.max(-1, Math.min(1, (event.clientY - cy) / cy));
+        document.body.style.setProperty("--px", px.toFixed(3));
+        document.body.style.setProperty("--py", py.toFixed(3));
+        pointerTicking = false;
+      });
+      pointerTicking = true;
+    }
+  });
+}
 characterButton.addEventListener("touchstart", handleTap, { passive: false });
 characterButton.addEventListener("click", handleTap);
 document.getElementById("settingsButton").addEventListener("click", openSettings);
@@ -2233,13 +2239,13 @@ setInterval(() => {
 setInterval(() => {
   if (appInBackground) return;
   moveNPCs();
-}, 4500);
+}, 6000);
 
 setInterval(() => {
   if (appInBackground) return;
   updateWorldProgression();
   applyOutfit();
-}, 2000);
+}, 5000);
 
 // Kitty Idle Animations Loop
 setInterval(() => {
