@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sprite Slicer — Heart Battle</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #eee; padding: 20px; }
+    canvas { display: none; }
+    .log { white-space: pre; font-size: 12px; background: #1a1a1a; padding: 10px; border-radius: 4px; max-height: 400px; overflow-y: auto; }
+    button { padding: 12px 24px; background: #ff8fb1; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 8px; }
+    .done { color: #66ff99; }
+    .error { color: #ff6666; }
+    a { color: #88ccff; }
+    .download-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+    .sprite-item { text-align: center; background: #222; padding: 8px; border-radius: 6px; }
+    .sprite-item img { max-width: 80px; max-height: 80px; border: 1px solid #444; border-radius: 4px; background: repeating-conic-gradient(#333 0% 25%, #444 0% 50%) 0 0/20px 20px; }
+    .sprite-item .name { font-size: 10px; color: #aaa; margin-top: 4px; word-break: break-all; }
+    .sprite-item a { display: block; font-size: 11px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <h1>🎀 Heart Battle — Sprite Slicer</h1>
+  <p>Clique em "Gerar Sprites" para criar todos os sprites individuais WebP.<br>
+  Depois baixe cada um e salve na pasta <code>sprites/</code> do projeto.</p>
+  <button onclick="generateAll()">🎨 Gerar Todos os Sprites</button>
+  <button onclick="downloadAll()">⬇️ Baixar Todos (ZIP)</button>
+  <div class="log" id="log">Aguardando...</div>
+  <div class="download-list" id="downloadList"></div>
+  <canvas id="c"></canvas>
+
+<script>
+// ─── Sprite definitions ───
+// Each entry: { name, emoji, color, size }
+const SPRITE_DEFS = [
+  // Projectiles
+  { name: "proj_apple",     emoji: "🍎", color: "#ff4444", glow: "#ff0000", size: 48 },
+  { name: "proj_bow",       emoji: "🎀", color: "#ff88bb", glow: "#ff55aa", size: 48 },
+  { name: "proj_heart",     emoji: "❤️", color: "#ff3366", glow: "#ff0044", size: 48 },
+  { name: "proj_star",      emoji: "⭐", color: "#ffd700", glow: "#ffaa00", size: 48 },
+  { name: "proj_flower",    emoji: "🌸", color: "#ffaadd", glow: "#ff88cc", size: 48 },
+  { name: "proj_petal",     emoji: "🌺", color: "#ff66aa", glow: "#ff44aa", size: 48 },
+  { name: "proj_mushroom",  emoji: "🍄", color: "#cc4422", glow: "#aa2200", size: 48 },
+  { name: "proj_bunny",     emoji: "🐰", color: "#ffccdd", glow: "#ffaacc", size: 48 },
+  { name: "proj_cloud",     emoji: "☁️", color: "#aaddff", glow: "#88bbff", size: 48 },
+  { name: "proj_balloon",   emoji: "🎈", color: "#ff6688", glow: "#ff4466", size: 48 },
+  { name: "proj_drop",      emoji: "💧", color: "#4488ff", glow: "#2266ff", size: 48 },
+  { name: "proj_bubble",    emoji: "🫧", color: "#88ddff", glow: "#44bbff", size: 48 },
+  { name: "proj_leaf",      emoji: "🍃", color: "#44cc66", glow: "#22aa44", size: 48 },
+  { name: "proj_bat",       emoji: "🦇", color: "#8844aa", glow: "#6622aa", size: 48 },
+  { name: "proj_lightning", emoji: "⚡", color: "#bb66ff", glow: "#9933ff", size: 48 },
+  { name: "proj_skull",     emoji: "💀", color: "#ddaaff", glow: "#bb66ff", size: 48 },
+  { name: "proj_spike",     emoji: "✦", color: "#9944cc", glow: "#7722aa", size: 48 },
+  { name: "proj_bolt",      emoji: "💢", color: "#ff4466", glow: "#ff0044", size: 48 },
+  // Power-ups
+  { name: "pu_heal",    emoji: "❤️‍🩹", color: "#ff6699", glow: "#ff3377", size: 48 },
+  { name: "pu_double",  emoji: "⭐", color: "#ffd700", glow: "#ffaa00", size: 48 },
+  { name: "pu_slow",    emoji: "🎀", color: "#88aaff", glow: "#6688ff", size: 48 },
+  { name: "pu_shield",  emoji: "🍰", color: "#ffcc88", glow: "#ffaa44", size: 48 },
+  { name: "pu_invuln",  emoji: "🌈", color: "#88ddff", glow: "#44bbff", size: 48 },
+  // Player
+  { name: "player_heart",     emoji: "❤️", color: "#ff4466", glow: "#ff0044", size: 48, border: "#ffd700" },
+  { name: "player_heart_hit", emoji: "💔", color: "#ff8899", glow: "#ff4466", size: 48, border: "#ffcccc" },
+];
+
+const COLLECTOR_DEFS = [
+  { name: "collector_normal",   emoji: "👁️‍🗨️", label: "Normal",   color: "#cc44ff", bg: "#1a0030" },
+  { name: "collector_angry",    emoji: "😡",     label: "Furiosa",  color: "#ff2266", bg: "#200010" },
+  { name: "collector_defeated", emoji: "😵",     label: "Derrotada",color: "#8888cc", bg: "#100020" },
+];
+
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const generated = [];
+
+function log(msg, cls = "") {
+  const el = document.getElementById("log");
+  el.innerHTML += `<span class="${cls}">${msg}\n</span>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function drawSprite(def) {
+  const size = def.size;
+  canvas.width = size;
+  canvas.height = size;
+  ctx.clearRect(0, 0, size, size);
+
+  // Glow circle
+  const grd = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  grd.addColorStop(0, def.glow + "88");
+  grd.addColorStop(1, "transparent");
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size/2 - 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Border circle if needed
+  if (def.border) {
+    ctx.strokeStyle = def.border;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2 - 3, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Emoji
+  const fontSize = Math.floor(size * 0.65);
+  ctx.font = `${fontSize}px serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(def.emoji, size/2, size/2 + 2);
+
+  // Sparkle dots
+  for (let i = 0; i < 4; i++) {
+    const angle = (i / 4) * Math.PI * 2 + Math.PI / 8;
+    const dist = size * 0.38;
+    const sx = size/2 + Math.cos(angle) * dist;
+    const sy = size/2 + Math.sin(angle) * dist;
+    ctx.fillStyle = "rgba(255,255,255,0.8)";
+    ctx.beginPath();
+    ctx.arc(sx, sy, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawCollector(def) {
+  const size = 128;
+  canvas.width = size;
+  canvas.height = size;
+  ctx.clearRect(0, 0, size, size);
+
+  // Glowing backdrop
+  const grd = ctx.createRadialGradient(size/2, size/2, 10, size/2, size/2, size/2);
+  grd.addColorStop(0, def.color + "44");
+  grd.addColorStop(1, "transparent");
+  ctx.fillStyle = grd;
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size/2 - 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Label
+  const labelColors = { "Normal": "#cc44ff", "Furiosa": "#ff2266", "Derrotada": "#8888cc" };
+  ctx.fillStyle = labelColors[def.label] || def.color;
+  ctx.font = "bold 13px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.fillText(def.label, size/2, size - 4);
+
+  // Emoji — large
+  ctx.font = "72px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(def.emoji, size/2, size/2 - 8);
+
+  // Stars around for glow
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const dist = 48;
+    const sx = size/2 + Math.cos(angle) * dist;
+    const sy = size/2 - 8 + Math.sin(angle) * dist;
+    ctx.fillStyle = def.color + "99";
+    ctx.font = "12px serif";
+    ctx.textAlign = "center";
+    ctx.fillText("✦", sx, sy);
+  }
+}
+
+function canvasToBlob(quality = 0.92) {
+  return new Promise(resolve => {
+    canvas.toBlob(resolve, "image/webp", quality);
+  });
+}
+
+function addDownloadItem(name, blob) {
+  const url = URL.createObjectURL(blob);
+  const list = document.getElementById("downloadList");
+  const div = document.createElement("div");
+  div.className = "sprite-item";
+  div.innerHTML = `
+    <img src="${url}" alt="${name}">
+    <div class="name">${name}.webp</div>
+    <a href="${url}" download="${name}.webp">⬇ Baixar</a>
+  `;
+  list.appendChild(div);
+  generated.push({ name, url, blob });
+}
+
+async function generateAll() {
+  document.getElementById("downloadList").innerHTML = "";
+  generated.length = 0;
+  log("Gerando sprites...\n", "done");
+
+  for (const def of SPRITE_DEFS) {
+    try {
+      drawSprite(def);
+      const blob = await canvasToBlob();
+      addDownloadItem(def.name, blob);
+      log(`✓ ${def.name}.webp`, "done");
+    } catch (e) {
+      log(`✗ ${def.name}: ${e.message}`, "error");
+    }
+  }
+
+  for (const def of COLLECTOR_DEFS) {
+    try {
+      drawCollector(def);
+      const blob = await canvasToBlob();
+      addDownloadItem(def.name, blob);
+      log(`✓ ${def.name}.webp (128x128)`, "done");
+    } catch (e) {
+      log(`✗ ${def.name}: ${e.message}`, "error");
+    }
+  }
+
+  log(`\n🎀 Pronto! ${generated.length} sprites gerados.`, "done");
+  log('Clique em cada "⬇ Baixar" para salvar em Hello Clicker/sprites/', "done");
+  log('\nOu use o botão "⬇️ Baixar Todos" para um ZIP.', "done");
+}
+
+async function downloadAll() {
+  if (generated.length === 0) {
+    await generateAll();
+  }
+  // Download each file individually (browsers block bulk download but allow sequential)
+  for (const item of generated) {
+    const a = document.createElement("a");
+    a.href = item.url;
+    a.download = `${item.name}.webp`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    await new Promise(r => setTimeout(r, 80));
+  }
+}
+</script>
+</body>
+</html>

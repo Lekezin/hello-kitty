@@ -348,7 +348,8 @@ function createDefaultState() {
     outfit: "DEFAULT",
     event: "NORMAL",
     rebirths: 0,
-    mainCharacter: "kitty"
+    mainCharacter: "kitty",
+    collectorDefeated: false
   };
 }
 
@@ -2080,6 +2081,8 @@ function createAchievementDefs() {
   [1, 3, 7, 14, 21, 30, 60, 100, 180, 365].forEach((goal, index) => add(`daily-${goal}`, "📅", `${goal} dias`, `Mantenha sequência diária de ${goal}`, 2 + index, (s) => s.daily.streak >= goal));
   [1, 5, 10, 25, 50, 100, 200, 500, 1000].forEach((goal, index) => add(`gifts-${goal}`, "🎁", `${goal} presentes`, `Entregue ${goal} presentes`, 1 + Math.floor(index / 2), (s) => s.quests.giftsGiven >= goal));
   [1, 3, 5, 10, 20, 50, 100, 200].forEach((goal, index) => add(`minigames-${goal}`, "🎮", `${goal} minigames`, `Vença ${goal} minigames`, 2 + index, (s) => s.quests.minigamesWon >= goal));
+  // Special: Collector boss
+  add("collector-defeated", "🏆", "Defensora da Amizade", "Derrote a Colecionadora Maníaca no Heart Battle", 25, (s) => Boolean(s.collectorDefeated));
   return defs;
 }
 
@@ -2478,6 +2481,12 @@ function initMikuEasterEgg() {
   }, 240000);
 }
 function startBossFight(isReplay) {
+  // Redirect to the new Heart Battle engine
+  if (typeof startHeartBattle === "function") {
+    startHeartBattle(isReplay);
+    return;
+  }
+  // Fallback (should not happen if heartbattle.js is loaded)
   const overlay = document.createElement("div");
   overlay.className = "boss-overlay is-active";
   overlay.innerHTML = `

@@ -1165,12 +1165,4 @@ button {
   100% { opacity: 0; transform: translate(-50%, -70%) scale(0.9); }
 }
 
-/* Boss Fight Overlay */
-.boss-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-family: 'Inter', sans-serif; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-.boss-overlay.is-active { opacity: 1; pointer-events: auto; }
-.boss-timer { font-size: 48px; font-weight: 900; color: #ff3d7f; text-shadow: 0 0 20px rgba(255,61,127,0.6); margin-bottom: 10px; font-variant-numeric: tabular-nums; }
-.boss-clicks { font-size: 24px; font-weight: 800; margin-bottom: 30px; }
-.boss-button { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #ff3d7f, #b31245); border: 8px solid #fff; box-shadow: 0 0 40px rgba(255,61,127,0.8); font-size: 80px; display: grid; place-items: center; cursor: pointer; user-select: none; transition: transform 0.05s; -webkit-tap-highlight-color: transparent; }
-.boss-button:active { transform: scale(0.92); }
-.boss-title { font-size: 32px; font-weight: 900; margin-bottom: 10px; text-align: center; color: #ff86aa; }
-.boss-desc { font-size: 16px; margin-bottom: 30px; text-align: center; max-width: 80%; line-height: 1.4; }
+/* Boss Fight styles moved to heartbattle.css */
